@@ -42,7 +42,7 @@ let rec with_id t f =
     let rec find_free_id () =
       (* [gen n] picks a value in the interval [0, n-1]. DNS transaction
          ids are between [0, 0xffff] *)
-      let id = Nocrypto.Rng.Int.gen 0x10000 in
+let id = Random.int 0x10000 in
       if IntSet.mem id t.used_ids
       then find_free_id ()
       else id in

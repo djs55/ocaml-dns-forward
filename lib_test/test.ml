@@ -799,7 +799,7 @@ let () =
                    (Printexc.get_backtrace ())
                )
     );
-  Nocrypto_entropy_unix.initialize ();
+  Random.self_init ();
 
   Alcotest.run "dns-forward" [
     "Test infrastructure", test_infra_set;
