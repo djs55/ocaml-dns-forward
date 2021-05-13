@@ -15,14 +15,12 @@
  *
  *)
 
-open Sexplib.Std
-
 module Address = struct
   module M = struct
     type t = {
       ip: Ipaddr.t;
       port: int;
-    } [@@deriving sexp]
+    }
 
     let compare a b =
       let ip = Ipaddr.compare a.ip b.ip in
@@ -36,20 +34,11 @@ end
 
 module Domain = struct
   module M = struct
-    type t = string list [@@deriving sexp]
+    type t = string list
     let compare (a: t) (b: t) = Pervasives.compare a b
   end
   include M
-  module Set = struct
-    include Set.Make(M)
-   type _t = M.t list [@@deriving sexp]
-      let t_of_sexp (sexp: Sexplib.Type.t) : t =
-      let _t = _t_of_sexp sexp in
-      List.fold_left (fun set elt -> add elt set) empty _t
-      let sexp_of_t (t: t) : Sexplib.Type.t =
-        let _t = fold (fun elt acc -> elt :: acc) t [] in
-        sexp_of__t _t
-  end
+  module Set = Set.Make(M)
   module Map = Map.Make(M)
   let to_string = String.concat "."
 end
@@ -61,7 +50,7 @@ module Server = struct
       address: Address.t;
       timeout_ms: int option;
       order: int;
-    } [@@deriving sexp]
+    }
 
     let compare (a: t) (b: t) =
       let zones = Domain.Set.compare a.zones b.zones in
@@ -74,16 +63,7 @@ module Server = struct
       else timeout_ms
   end
   include M
-  module Set = struct
-    include Set.Make(M)
-    type _t = M.t list [@@deriving sexp]
-    let t_of_sexp (sexp: Sexplib.Type.t) : t =
-      let _t = _t_of_sexp sexp in
-      List.fold_left (fun set elt -> add elt set) empty _t
-    let sexp_of_t (t: t) : Sexplib.Type.t =
-      let _t = fold (fun elt acc -> elt :: acc) t [] in
-      sexp_of__t _t
-  end
+  module Set = Set.Make(M)
   module Map = Map.Make(M)
 end
 
@@ -91,7 +71,7 @@ type t = {
   servers: Server.Set.t;
   search: string list;
   assume_offline_after_drops: int option;
-} [@@deriving sexp]
+}
 
 let compare a b =
   let servers = Server.Set.compare a.servers b.servers in

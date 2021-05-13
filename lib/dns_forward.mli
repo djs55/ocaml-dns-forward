@@ -158,7 +158,7 @@ module Config: sig
     search: string list;   (** Ordered list of domains to search *)
     assume_offline_after_drops: int option;
     (** Once this number of drops have happened, assume the server is offline *)
-  } [@@deriving sexp]
+  }
   (** A DNS configuration *)
 
   include Comparable with type t := t
