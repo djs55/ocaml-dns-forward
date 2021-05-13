@@ -31,10 +31,10 @@ let pp_write_error = Mirage_flow.pp_write_error
 type 'a io = 'a Lwt.t
 
 type flow = {
-  l2r: Cstruct.t Lwt_sequence.t; (* pending data from left to right *)
+  l2r: Cstruct.t Lwt_dllist.t; (* pending data from left to right *)
   mutable l2r_closed: bool;
   l2r_c: unit Lwt_condition.t;
-  r2l: Cstruct.t Lwt_sequence.t; (* pending data from right to left *)
+  r2l: Cstruct.t Lwt_dllist.t; (* pending data from right to left *)
   mutable r2l_closed: bool;
   r2l_c: unit Lwt_condition.t;
   client_address: address;
@@ -42,8 +42,8 @@ type flow = {
 }
 
 let openflow server_address =
-  let l2r = Lwt_sequence.create () in
-  let r2l = Lwt_sequence.create () in
+  let l2r = Lwt_dllist.create () in
+  let r2l = Lwt_dllist.create () in
   let l2r_c = Lwt_condition.create () in
   let r2l_c = Lwt_condition.create () in
   let l2r_closed = false in
@@ -59,7 +59,7 @@ let otherend flow =
 let read flow =
   let open Lwt.Infix in
   let rec wait () =
-    if Lwt_sequence.is_empty flow.r2l && not(flow.r2l_closed) then begin
+    if Lwt_dllist.is_empty flow.r2l && not(flow.r2l_closed) then begin
       Lwt_condition.wait flow.r2l_c
       >>= fun () ->
       wait ()
@@ -68,11 +68,11 @@ let read flow =
   >>= fun () ->
   if flow.r2l_closed
   then Lwt.return (Ok `Eof)
-  else Lwt.return (Ok (`Data (Lwt_sequence.take_r flow.r2l)))
+  else Lwt.return (Ok (`Data (Lwt_dllist.take_r flow.r2l)))
 
 let write flow buf =
   if flow.l2r_closed then Lwt.return (Error `Closed) else (
-    ignore @@ Lwt_sequence.add_l buf flow.l2r;
+    ignore @@ Lwt_dllist.add_l buf flow.l2r;
     Lwt_condition.signal flow.l2r_c ();
     Lwt.return (Ok ())
   )
@@ -89,7 +89,7 @@ let shutdown_write flow =
 
 let writev flow bufs =
   if flow.l2r_closed then Lwt.return (Error `Closed) else (
-    List.iter (fun buf -> ignore @@ Lwt_sequence.add_l buf flow.l2r) bufs;
+    List.iter (fun buf -> ignore @@ Lwt_dllist.add_l buf flow.l2r) bufs;
     Lwt_condition.signal flow.l2r_c ();
     Lwt.return (Ok ())
   )

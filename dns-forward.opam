@@ -16,6 +16,7 @@ depends: [
   "cstruct" {>= "3.0.0"}
   "logs" {>= "0.5.0"}
   "lwt" {>= "2.7.0"}
+  "lwt-dllist"
   "mirage-flow-lwt" {>= "1.2.0"}
   "mirage-clock-lwt"
   "mirage-channel-lwt"
