@@ -1,0 +1,7 @@
+(executables
+ (names test)
+ (libraries dns-forward dns-forward-lwt-unix logs logs.fmt alcotest))
+
+(rule
+ (alias  runtest)
+ (action (run ./test.exe)))
