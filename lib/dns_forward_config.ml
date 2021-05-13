@@ -24,7 +24,7 @@ module Address = struct
 
     let compare a b =
       let ip = Ipaddr.compare a.ip b.ip in
-      if ip <> 0 then ip else Pervasives.compare a.port b.port
+      if ip <> 0 then ip else Stdlib.compare a.port b.port
   end
   include M
   let to_string { ip; port } = Printf.sprintf "%s:%d" (Ipaddr.to_string ip) port
@@ -35,7 +35,7 @@ end
 module Domain = struct
   module M = struct
     type t = string list
-    let compare (a: t) (b: t) = Pervasives.compare a b
+    let compare (a: t) (b: t) = Stdlib.compare a b
   end
   include M
   module Set = Set.Make(M)
@@ -55,8 +55,8 @@ module Server = struct
     let compare (a: t) (b: t) =
       let zones = Domain.Set.compare a.zones b.zones in
       let address = Address.compare a.address b.address in
-      let order = Pervasives.compare a.order b.order in
-      let timeout_ms = Pervasives.compare a.timeout_ms b.timeout_ms in
+      let order = Stdlib.compare a.order b.order in
+      let timeout_ms = Stdlib.compare a.timeout_ms b.timeout_ms in
       if address <> 0 then address
       else if zones <> 0 then zones
       else if order <> 0 then order
@@ -75,7 +75,7 @@ type t = {
 
 let compare a b =
   let servers = Server.Set.compare a.servers b.servers in
-  if servers <> 0 then servers else Pervasives.compare a.search b.search
+  if servers <> 0 then servers else Stdlib.compare a.search b.search
 
 let nameserver_prefix = "nameserver "
 let search_prefix = "search "

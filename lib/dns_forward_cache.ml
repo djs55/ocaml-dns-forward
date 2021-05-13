@@ -19,10 +19,10 @@ module Question = struct
   module M = struct
     type t = Dns.Packet.question
 
-    (* Pervasives.compare is ok because the question consists of a record of
+    (* Stdlib.compare is ok because the question consists of a record of
        constant constructors and a string list. Ideally ocaml-dns would provide
        nice `compare` functions. *)
-    let compare = Pervasives.compare
+    let compare = Stdlib.compare
   end
   module Map = Map.Make(M)
   include M
